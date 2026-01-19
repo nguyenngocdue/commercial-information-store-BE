@@ -7,15 +7,15 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Customer } from './customer.entity';
+import { User } from './user.entity';
 
 @Entity({ name: 'vehicles' })
 export class Vehicle {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column({ name: 'customer_id', type: 'uuid' })
-  customerId: string;
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
 
   @Column({ length: 40, nullable: true, unique: true })
   vin?: string;
@@ -38,9 +38,9 @@ export class Vehicle {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @ManyToOne(() => Customer, (customer) => customer.vehicles, {
+  @ManyToOne(() => User, (user) => user.vehicles, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'customer_id' })
-  customer: Customer;
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 }

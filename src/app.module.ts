@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomersModule } from './customers/customers.module';
+import { UsersModule } from './users/users.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { Customer } from './database/entities/customer.entity';
+import { User } from './database/entities/user.entity';
 import { OrderItem } from './database/entities/order-item.entity';
 import { Order } from './database/entities/order.entity';
 import { Part } from './database/entities/part.entity';
@@ -29,14 +29,14 @@ import { Vehicle } from './database/entities/vehicle.entity';
           password: databaseUrl ? undefined : config.get('DB_PASSWORD'),
           database: databaseUrl ? undefined : config.get('DB_NAME'),
           ssl: isSsl ? { rejectUnauthorized: false } : undefined,
-          entities: [Customer, Vehicle, Store, Part, Order, OrderItem],
+          entities: [User, Vehicle, Store, Part, Order, OrderItem],
           migrations: [__dirname + '/database/migrations/*.{ts,js}'],
           synchronize: false,
           logging: config.get('DB_LOGGING') === 'true',
         };
       },
     }),
-    CustomersModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

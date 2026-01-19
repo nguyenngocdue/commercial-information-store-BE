@@ -1,6 +1,6 @@
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
-export class UpdateCustomerDto {
+export class UpdateUserDto {
   @IsOptional()
   @IsString()
   @Length(1, 120)
@@ -20,6 +20,11 @@ export class UpdateCustomerDto {
   @IsString()
   @Length(3, 255)
   address?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 30)
+  role?: string;
 
   @IsOptional()
   @IsString()

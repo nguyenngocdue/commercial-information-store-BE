@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { DataSource } from 'typeorm';
-import { Customer } from './database/entities/customer.entity';
+import { User } from './database/entities/user.entity';
 import { OrderItem } from './database/entities/order-item.entity';
 import { Order } from './database/entities/order.entity';
 import { Part } from './database/entities/part.entity';
@@ -39,7 +39,7 @@ export default new DataSource({
         rejectUnauthorized: false,
       }
     : false,
-  entities: [Customer, Vehicle, Store, Part, Order, OrderItem],
+  entities: [User, Vehicle, Store, Part, Order, OrderItem],
   migrations: [__dirname + '/database/migrations/*.{ts,js}'],
   synchronize: false,
 });

@@ -9,7 +9,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { OrderStatus } from '../enums/order-status.enum';
-import { Customer } from './customer.entity';
+import { User } from './user.entity';
 import { OrderItem } from './order-item.entity';
 import { Store } from './store.entity';
 import { Vehicle } from './vehicle.entity';
@@ -22,8 +22,8 @@ export class Order {
   @Column({ name: 'store_id', type: 'uuid' })
   storeId: string;
 
-  @Column({ name: 'customer_id', type: 'uuid' })
-  customerId: string;
+  @Column({ name: 'user_id', type: 'uuid' })
+  userId: string;
 
   @Column({ name: 'vehicle_id', type: 'uuid', nullable: true })
   vehicleId?: string;
@@ -56,11 +56,11 @@ export class Order {
   @JoinColumn({ name: 'store_id' })
   store: Store;
 
-  @ManyToOne(() => Customer, (customer) => customer.orders, {
+  @ManyToOne(() => User, (user) => user.orders, {
     onDelete: 'RESTRICT',
   })
-  @JoinColumn({ name: 'customer_id' })
-  customer: Customer;
+  @JoinColumn({ name: 'user_id' })
+  user: User;
 
   @ManyToOne(() => Vehicle, {
     onDelete: 'SET NULL',

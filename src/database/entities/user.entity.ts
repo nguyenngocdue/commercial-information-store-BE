@@ -9,8 +9,8 @@ import {
 import { Order } from './order.entity';
 import { Vehicle } from './vehicle.entity';
 
-@Entity({ name: 'customers' })
-export class Customer {
+@Entity({ name: 'users' })
+export class User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -26,6 +26,9 @@ export class Customer {
   @Column({ length: 255, nullable: true })
   address?: string;
 
+  @Column({ length: 30, default: 'user' })
+  role: string;
+
   @Column({ type: 'text', nullable: true })
   notes?: string;
 
@@ -35,9 +38,9 @@ export class Customer {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  @OneToMany(() => Vehicle, (vehicle) => vehicle.customer)
+  @OneToMany(() => Vehicle, (vehicle) => vehicle.user)
   vehicles: Vehicle[];
 
-  @OneToMany(() => Order, (order) => order.customer)
+  @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 }

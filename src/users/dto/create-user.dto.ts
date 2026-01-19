@@ -1,6 +1,6 @@
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 
-export class CreateCustomerDto {
+export class CreateUserDto {
   @IsString()
   @Length(1, 120)
   fullName: string;
@@ -19,6 +19,11 @@ export class CreateCustomerDto {
   @IsString()
   @Length(3, 255)
   address?: string;
+
+  @IsOptional()
+  @IsString()
+  @Length(3, 30)
+  role?: string;
 
   @IsOptional()
   @IsString()
