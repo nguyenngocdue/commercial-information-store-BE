@@ -18,6 +18,10 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:pull": "prisma db pull",
+    "prisma:studio": "prisma studio",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
     "migration:create": "typeorm-ts-node-commonjs migration:create src/database/migrations/Name",
@@ -29,6 +33,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
+    "@prisma/client": "^6.1.0",
     "@supabase/supabase-js": "^2.90.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
@@ -60,6 +65,7 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
+    "prisma": "^6.1.0",
     "typescript-eslint": "^8.20.0"
   },
   "jest": {

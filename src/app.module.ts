@@ -10,10 +10,12 @@ import { Order } from './database/entities/order.entity';
 import { Part } from './database/entities/part.entity';
 import { Store } from './database/entities/store.entity';
 import { Vehicle } from './database/entities/vehicle.entity';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    PrismaModule,
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
