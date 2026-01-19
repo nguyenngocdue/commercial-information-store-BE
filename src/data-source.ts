@@ -10,15 +10,35 @@ import { Vehicle } from './database/entities/vehicle.entity';
 const databaseUrl = process.env.DATABASE_URL;
 const isSsl = process.env.DB_SSL === 'true';
 
+// Parse DATABASE_URL if it exists
+let dbConfig: any = {};
+if (databaseUrl) {
+  const url = new URL(databaseUrl);
+  dbConfig = {
+    host: url.hostname,
+    port: parseInt(url.port) || 5432,
+    username: url.username,
+    password: url.password,
+    database: url.pathname.slice(1), // Remove leading '/'
+  };
+} else {
+  dbConfig = {
+    host: process.env.DB_HOST,
+    port: Number(process.env.DB_PORT || 5432),
+    username: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+  };
+}
+
 export default new DataSource({
   type: 'postgres',
-  url: databaseUrl,
-  host: databaseUrl ? undefined : process.env.DB_HOST,
-  port: databaseUrl ? undefined : Number(process.env.DB_PORT || 5432),
-  username: databaseUrl ? undefined : process.env.DB_USER,
-  password: databaseUrl ? undefined : process.env.DB_PASSWORD,
-  database: databaseUrl ? undefined : process.env.DB_NAME,
-  ssl: isSsl ? { rejectUnauthorized: false } : undefined,
+  ...dbConfig,
+  ssl: isSsl
+    ? {
+        rejectUnauthorized: false,
+      }
+    : false,
   entities: [Customer, Vehicle, Store, Part, Order, OrderItem],
   migrations: [__dirname + '/database/migrations/*.{ts,js}'],
   synchronize: false,
