@@ -9,7 +9,11 @@ import { User } from './database/entities/user.entity';
 import { OrderItem } from './database/entities/order-item.entity';
 import { Order } from './database/entities/order.entity';
 import { Part } from './database/entities/part.entity';
+import { Permission } from './database/entities/permission.entity';
+import { RolePermission } from './database/entities/role-permission.entity';
+import { Role } from './database/entities/role.entity';
 import { Store } from './database/entities/store.entity';
+import { UserRole } from './database/entities/user-role.entity';
 import { Vehicle } from './database/entities/vehicle.entity';
 import { PrismaModule } from './prisma/prisma.module';
 
@@ -32,7 +36,18 @@ import { PrismaModule } from './prisma/prisma.module';
           password: databaseUrl ? undefined : config.get('DB_PASSWORD'),
           database: databaseUrl ? undefined : config.get('DB_NAME'),
           ssl: isSsl ? { rejectUnauthorized: false } : undefined,
-          entities: [User, Vehicle, Store, Part, Order, OrderItem],
+          entities: [
+            User,
+            Vehicle,
+            Store,
+            Part,
+            Order,
+            OrderItem,
+            Role,
+            Permission,
+            UserRole,
+            RolePermission,
+          ],
           migrations: [__dirname + '/database/migrations/*.{ts,js}'],
           synchronize: false,
           logging: config.get('DB_LOGGING') === 'true',

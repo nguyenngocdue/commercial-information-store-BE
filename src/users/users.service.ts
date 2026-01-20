@@ -1,5 +1,5 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, PrismaClient } from '@prisma/client';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -9,7 +9,17 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(payload: CreateUserDto) {
-    return this.prisma.user.create({ data: payload });
+    try {
+      return await this.prisma.user.create({ data: payload });
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new ConflictException('Phone already exists');
+      }
+      throw error;
+    }
   }
 
   async findAll() {
