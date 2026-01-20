@@ -22,6 +22,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:pull": "prisma db pull",
     "prisma:studio": "prisma studio",
+    "seed:users": "ts-node scripts/seed-users.ts",
+    "seed:vehicles": "ts-node scripts/seed-vehicles.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d src/data-source.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d src/data-source.ts",
     "migration:create": "typeorm-ts-node-commonjs migration:create src/database/migrations/Name",
