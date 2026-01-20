@@ -5,17 +5,15 @@ export class CreateUserDto {
   @Length(1, 120)
   fullName: string;
 
-  @IsOptional()
   @IsString()
   @Length(6, 30)
-  phone?: string;
+  phone: string;
 
   @IsOptional()
   @IsEmail()
   @Length(3, 150)
   email?: string;
 
-  @IsOptional()
   @IsString()
   @Length(3, 255)
   address?: string;
