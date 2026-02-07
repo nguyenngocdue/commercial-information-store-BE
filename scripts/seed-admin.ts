@@ -132,7 +132,7 @@ async function main() {
     console.log('   Role: admin');
     console.log('   Permissions: view_users, manage_users');
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error('❌ Error:', error instanceof Error ? error.message : String(error));
     throw error;
   }
 }
