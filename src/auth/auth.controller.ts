@@ -47,9 +47,30 @@ class ResetPasswordWithTokenDto {
   newPassword: string;
 }
 
+class LoginDto {
+  @IsNotEmpty({ message: 'Email là bắt buộc' })
+  @IsEmail({}, { message: 'Email không hợp lệ' })
+  email: string;
+
+  @IsNotEmpty({ message: 'Mật khẩu là bắt buộc' })
+  @IsString()
+  @MinLength(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
+  password: string;
+}
+
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
+
+  /**
+   * POST /auth/login
+   * Login with email + password
+   */
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() dto: LoginDto) {
+    return this.authService.login(dto.email, dto.password);
+  }
 
   /**
    * POST /auth/forgot-password

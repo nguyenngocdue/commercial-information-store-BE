@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
@@ -15,6 +20,101 @@ export class AuthService {
 
   // Store reset tokens in memory (in production, use Redis)
   private resetTokens = new Map<string, { email: string; expiresAt: Date }>();
+
+  private normalizeEmail(email: string): string {
+    return email.trim().toLowerCase();
+  }
+
+  private resolvePrimaryRole(
+    roleNames: string[],
+    fallbackRole?: string | null,
+  ): string {
+    const priority: Record<string, number> = {
+      customer: 1,
+      staff: 2,
+      technician: 3,
+      manager: 4,
+      admin: 5,
+      user: 0,
+    };
+
+    if (roleNames.length > 0) {
+      return [...roleNames].sort(
+        (a, b) => (priority[b] ?? 0) - (priority[a] ?? 0),
+      )[0];
+    }
+
+    return fallbackRole?.toLowerCase() || 'customer';
+  }
+
+  /**
+   * Login with email + password
+   */
+  async login(email: string, password: string): Promise<{
+    user: {
+      id: string;
+      fullName: string;
+      email: string;
+      phone: string | null;
+      role: string;
+      createdAt: Date;
+      updatedAt: Date;
+    };
+    token: string;
+  }> {
+    if (!email) {
+      throw new BadRequestException('Email là bắt buộc');
+    }
+
+    if (!password) {
+      throw new BadRequestException('Mật khẩu là bắt buộc');
+    }
+
+    const normalizedEmail = this.normalizeEmail(email);
+
+    const user = await this.prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive',
+        },
+      },
+      include: {
+        userRoles: {
+          include: {
+            role: true,
+          },
+        },
+      },
+    });
+
+    if (!user || !user.password) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Email hoặc mật khẩu không đúng');
+    }
+
+    const userRoleNames = user.userRoles.map((userRole) => userRole.role.name);
+    const primaryRole = this.resolvePrimaryRole(userRoleNames, user.role);
+
+    const token = `session-${uuidv4()}`;
+
+    return {
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email ?? normalizedEmail,
+        phone: user.phone,
+        role: primaryRole,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      token,
+    };
+  }
 
   /**
    * Normalize phone number to standard format
