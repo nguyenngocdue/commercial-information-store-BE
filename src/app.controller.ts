@@ -9,4 +9,18 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+
+  @Get('health')
+  async healthCheck() {
+    return {
+      status: 'ok',
+      uptime: process.uptime(),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  @Get('health/database')
+  async databaseHealthCheck() {
+    return this.appService.checkDatabaseHealth();
+  }
 }
