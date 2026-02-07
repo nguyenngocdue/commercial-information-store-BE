@@ -1,0 +1,31 @@
+services:
+  # Backend API Service
+  - type: web
+    name: commercial-info-store-api
+    runtime: node
+    region: singapore
+    plan: free
+    buildCommand: pnpm install && npx prisma generate && pnpm build
+    startCommand: pnpm start:prod
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRATION
+        value: 7d
+      - key: ESMS_API_KEY
+        sync: false
+      - key: ESMS_SECRET_KEY
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+    healthCheckPath: /
