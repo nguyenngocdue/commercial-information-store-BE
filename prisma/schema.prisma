@@ -23,7 +23,7 @@ model User {
   email     String?  @unique @db.VarChar(150)
   password  String?  @db.VarChar(255)
   address   String?  @db.VarChar(255)
-  role      String   @default("user") @db.VarChar(30)
+  role      String   @default("customer") @db.VarChar(30) // Deprecated: Use userRoles relation instead
   notes     String?  @db.Text
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
