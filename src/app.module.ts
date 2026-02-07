@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { VehiclesModule } from './vehicles/vehicles.module';
+import { AuthModule } from './auth/auth.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { User } from './database/entities/user.entity';
@@ -56,6 +57,7 @@ import { PrismaModule } from './prisma/prisma.module';
     }),
     UsersModule,
     VehiclesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
