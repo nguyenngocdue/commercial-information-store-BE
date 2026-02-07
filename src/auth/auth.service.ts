@@ -1,14 +1,20 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 import { PrismaService } from '../prisma/prisma.service';
 import { SmsService } from './sms.service';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly smsService: SmsService,
+    private readonly emailService: EmailService,
   ) {}
+
+  // Store reset tokens in memory (in production, use Redis)
+  private resetTokens = new Map<string, { email: string; expiresAt: Date }>();
 
   /**
    * Normalize phone number to standard format
@@ -140,5 +146,138 @@ export class AuthService {
     return {
       message: 'Đổi mật khẩu thành công',
     };
+  }
+
+  /**
+   * Send password reset email with token
+   */
+  async sendPasswordResetEmail(email: string): Promise<{ message: string }> {
+    if (!email) {
+      throw new BadRequestException('Email là bắt buộc');
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new BadRequestException('Email không hợp lệ');
+    }
+
+    // Check if user exists
+    const user = await this.prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy tài khoản với email này');
+    }
+
+    // Generate reset token
+    const resetToken = uuidv4();
+    const expiresAt = new Date();
+    expiresAt.setMinutes(expiresAt.getMinutes() + 15); // Token expires in 15 minutes
+
+    // Store token
+    this.resetTokens.set(resetToken, { email, expiresAt });
+
+    // Send email
+    await this.emailService.sendPasswordResetEmail(email, resetToken, user.fullName);
+
+    return {
+      message: 'Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư của bạn.',
+    };
+  }
+
+  /**
+   * Verify reset token
+   */
+  async verifyResetToken(token: string): Promise<{ valid: boolean; email?: string }> {
+    if (!token) {
+      throw new BadRequestException('Token là bắt buộc');
+    }
+
+    const stored = this.resetTokens.get(token);
+
+    if (!stored) {
+      return { valid: false };
+    }
+
+    if (new Date() > stored.expiresAt) {
+      this.resetTokens.delete(token);
+      return { valid: false };
+    }
+
+    return { valid: true, email: stored.email };
+  }
+
+  /**
+   * Reset password with token
+   */
+  async resetPasswordWithToken(token: string, newPassword: string): Promise<{ message: string }> {
+    if (!token) {
+      throw new BadRequestException('Token là bắt buộc');
+    }
+    if (!newPassword) {
+      throw new BadRequestException('Mật khẩu mới là bắt buộc');
+    }
+
+    // Verify token
+    const tokenData = this.resetTokens.get(token);
+    if (!tokenData) {
+      throw new BadRequestException('Token không hợp lệ hoặc đã hết hạn');
+    }
+
+    if (new Date() > tokenData.expiresAt) {
+      this.resetTokens.delete(token);
+      throw new BadRequestException('Token đã hết hạn');
+    }
+
+    // Validate password strength
+    if (newPassword.length < 6) {
+      throw new BadRequestException('Mật khẩu phải có ít nhất 6 ký tự');
+    }
+
+    // Find user
+    const user = await this.prisma.user.findFirst({
+      where: { email: tokenData.email },
+    });
+
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy tài khoản');
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Update password
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    });
+
+    // Delete token so it can't be reused
+    this.resetTokens.delete(token);
+
+    return {
+      message: 'Đổi mật khẩu thành công',
+    };
+  }
+
+  /**
+   * Clean up expired reset tokens (call periodically)
+   */
+  cleanupExpiredTokens(): void {
+    const now = new Date();
+    let count = 0;
+
+    for (const [token, data] of this.resetTokens.entries()) {
+      if (now > data.expiresAt) {
+        this.resetTokens.delete(token);
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      console.log(`🧹 Cleaned up ${count} expired reset tokens`);
+    }
   }
 }
